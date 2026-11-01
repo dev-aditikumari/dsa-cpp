@@ -1,0 +1,12 @@
+#pragma once
+#include "algorithms.hpp"
+#include "graph.hpp"
+#include "hash_map.hpp"
+#include "heap.hpp"
+#include "linked_list.hpp"
+#include "lru_cache.hpp"
+#include "range_trees.hpp"
+#include "stack_queue.hpp"
+#include "trees.hpp"
+#include "trie.hpp"
+#include "union_find.hpp"

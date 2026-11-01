@@ -1,0 +1,9 @@
+#pragma once
+#include "array_techniques.hpp"
+#include "backtracking.hpp"
+#include "dynamic_programming.hpp"
+#include "graph_algorithms.hpp"
+#include "interview.hpp"
+#include "searching.hpp"
+#include "sorting.hpp"
+#include "strings.hpp"
