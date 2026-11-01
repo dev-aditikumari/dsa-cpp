@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main, production-ready]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+        std: [c++17, c++20]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests
+        run: make CXX=${{ matrix.compiler }} STD=-std=${{ matrix.std }} test -j"$(nproc)"
+      - name: Check every header compiles on its own
+        run: make CXX=${{ matrix.compiler }} STD=-std=${{ matrix.std }} headers
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests with ASan and UBSan
+        run: make CXX=${{ matrix.compiler }} sanitize -j"$(nproc)"
