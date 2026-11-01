@@ -1,7 +1,7 @@
-node_modules/
-dist/
-coverage/
+build/
+build-san/
+build-cov/
 .venv/
-.env
 .DS_Store
-*.log
+*.profraw
+*.profdata
