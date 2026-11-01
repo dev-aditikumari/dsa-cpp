@@ -1,144 +1,131 @@
-# DSA in TypeScript
+# Data Structures and Algorithms in C++
 
-A collection of data structures and algorithms written in strict TypeScript, with Jest tests and a
-complexity note on every implementation. The repo was originally a one-line `index.js`; that file is
-kept in `legacy/`.
+Header-only C++17 implementations of common data structures and algorithms, with a doctest test suite
+that is built with `-Wall -Wextra -Wpedantic -Werror` and run under AddressSanitizer and
+UndefinedBehaviorSanitizer. Every header has a short complexity note. The standard library is the only dependency
+(doctest is vendored for the tests). The original one-line `index.js` from this repo is kept in `legacy/`.
 
-Stack: TypeScript 5 (strict, `noUncheckedIndexedAccess`), Jest 29 with ts-jest, ESLint 9 with typescript-eslint,
-GitHub Actions.
+## Requirements
 
-## Install and run
+- A C++17 compiler (checked locally with Apple clang 21; also compiles with `-std=c++20`)
+- `make`
 
-Requires Node 20 or newer.
+## Build and test
 
 ```
-npm ci
-npm test            # jest with coverage and a coverage threshold
-npm run lint        # eslint
-npm run typecheck   # tsc --noEmit over src and tests
-npm run build       # compiles src to dist/
+make test          # build tests in build/ and run them
+make sanitize      # rebuild with -fsanitize=address,undefined into build-san/ and run
+make headers       # compile every header on its own
+make coverage LLVM_PROFDATA="xcrun llvm-profdata" LLVM_COV="xcrun llvm-cov"   # clang line coverage report (macOS)
+make clean
 ```
 
-Everything is exported from `src/index.ts`, for example `import { LRUCache, dijkstra } from "./src"`.
+Variables: `CXX=g++`, `STD=-std=c++20`, `EXTRA="-fsanitize=thread"` and so on. Use the library by adding `include/` to your
+include path and writing `#include "dsa/all.hpp"` (or a single header such as `dsa/heap.hpp`). Everything lives in
+namespace `dsa`.
 
-## What is covered
+## Data structures (`include/dsa/`)
 
-n is the input size, V and E are vertices and edges, h is tree height.
+n is the number of elements, V and E are vertices and edges, h is tree height.
 
-### Data structures (`src/data-structures/`)
-
-| Structure | File | Time | Space | Tests |
+| Structure | Header | Time | Space | Test file |
 |---|---|---|---|---|
-| Singly linked list | `linked-list.ts` | push/unshift O(1), pop/get/insert/remove O(n) | O(n) | `linked-list.test.ts` |
-| Doubly linked list | `doubly-linked-list.ts` | both ends O(1), indexed O(n) | O(n) | `linked-list.test.ts` |
-| Stack | `stack.ts` | O(1) amortised | O(n) | `stack-queue-deque.test.ts` |
-| Queue | `queue.ts` | O(1) amortised | O(n) | `stack-queue-deque.test.ts` |
-| Deque (circular buffer) | `deque.ts` | O(1) amortised | O(n) | `stack-queue-deque.test.ts` |
-| Binary heap (min/max) | `heap.ts` | push/pop O(log n), peek O(1), build O(n) | O(n) | `heap.test.ts` |
-| Priority queue | `priority-queue.ts` | O(log n) | O(n) | `heap.test.ts` |
-| Hash map (chaining, resizing) | `hash-map.ts` | O(1) average, O(n) worst | O(n) | `hash-map.test.ts` |
-| Binary search tree | `bst.ts` | O(h), O(n) when degenerate | O(n) | `trees.test.ts` |
-| AVL tree | `avl-tree.ts` | O(log n) | O(n) | `trees.test.ts` |
-| Trie | `trie.ts` | O(L) per word | O(total chars) | `trie.test.ts` |
-| Graph (adjacency list) | `graph.ts` | add O(1), removeVertex O(V + E) | O(V + E) | `graph.test.ts` |
-| Union-find | `union-find.ts` | O(alpha(n)) amortised | O(n) | `graph.test.ts` |
-| LRU cache | `lru-cache.ts` | get/put O(1) | O(capacity) | `lru-cache.test.ts` |
-| Fenwick tree | `fenwick-tree.ts` | O(log n) | O(n) | `range-trees.test.ts` |
-| Segment tree | `segment-tree.ts` | query/update O(log n) | O(n) | `range-trees.test.ts` |
+| Singly linked list | `linked_list.hpp` | push/pop front O(1), push_back O(1), pop_back/at/insert/erase O(n) | O(n) | `test_linked_list.cpp` |
+| Doubly linked list | `linked_list.hpp` | both ends O(1), at/erase by index O(n) | O(n) | `test_linked_list.cpp` |
+| Stack | `stack_queue.hpp` | O(1) amortised | O(n) | `test_stack_queue_deque.cpp` |
+| Queue | `stack_queue.hpp` | O(1) amortised | O(n) | `test_stack_queue_deque.cpp` |
+| Deque (ring buffer) | `stack_queue.hpp` | O(1) amortised at both ends | O(n) | `test_stack_queue_deque.cpp` |
+| Binary heap (min or max) | `heap.hpp` | push/pop O(log n), top O(1), build O(n) | O(n) | `test_heap.cpp` |
+| Priority queue (FIFO on ties) | `heap.hpp` | O(log n) | O(n) | `test_heap.cpp` |
+| Hash map (chaining, rehash at load 0.75) | `hash_map.hpp` | O(1) average, O(n) worst | O(n) | `test_hash_map.cpp` |
+| Binary search tree | `trees.hpp` | O(h), O(n) when degenerate | O(n) | `test_trees.cpp` |
+| AVL tree | `trees.hpp` | O(log n) | O(n) | `test_trees.cpp` |
+| Trie | `trie.hpp` | O(L) per word | O(total characters) | `test_trie.cpp` |
+| Graph (adjacency list) | `graph.hpp` | add_edge O(1), neighbors O(1) | O(V + E) | `test_graph.cpp` |
+| Union-find (rank, path compression) | `union_find.hpp` | O(alpha(n)) amortised | O(n) | `test_graph.cpp` |
+| LRU cache | `lru_cache.hpp` | get/put O(1) average | O(capacity) | `test_lru_cache.cpp` |
+| Fenwick tree | `range_trees.hpp` | O(log n) | O(n) | `test_range_trees.cpp` |
+| Segment tree | `range_trees.hpp` | query/update O(log n) | O(n) | `test_range_trees.cpp` |
 
-### Algorithms (`src/algorithms/`)
+## Algorithms (`include/dsa/`)
 
-| Algorithm | File | Time | Space | Tests |
+| Algorithm | Header | Time | Space | Test file |
 |---|---|---|---|---|
-| Bubble, insertion, selection sort | `sorting.ts` | O(n^2) | O(1) extra | `sorting.test.ts` |
-| Merge sort (stable) | `sorting.ts` | O(n log n) | O(n) | `sorting.test.ts` |
-| Quick sort (3-way, median of three) | `sorting.ts` | O(n log n) expected, O(n^2) worst | O(log n) | `sorting.test.ts` |
-| Heap sort | `sorting.ts` | O(n log n) | O(n) | `sorting.test.ts` |
-| Counting sort (integers) | `sorting.ts` | O(n + k) | O(n + k) | `sorting.test.ts` |
-| Binary search, lower/upper bound, count | `searching.ts` | O(log n) | O(1) | `searching.test.ts` |
-| Rotated array search and rotation point | `searching.ts` | O(log n), O(n) with duplicates | O(1) | `searching.test.ts` |
-| Search on answer, ship within days, integer sqrt | `searching.ts` | O(log range) probes | O(1) | `searching.test.ts` |
-| BFS, DFS, unweighted shortest path, components | `graph-algorithms.ts` | O(V + E) | O(V) | `graph-algorithms.test.ts` |
-| Topological sort (Kahn) | `graph-algorithms.ts` | O(V + E) | O(V) | `graph-algorithms.test.ts` |
-| Dijkstra | `graph-algorithms.ts` | O((V + E) log V) | O(V) | `graph-algorithms.test.ts` |
-| Bellman-Ford | `graph-algorithms.ts` | O(V * E) | O(V) | `graph-algorithms.test.ts` |
-| Kruskal, Prim | `graph-algorithms.ts` | O(E log E), O(E log V) | O(V + E) | `graph-algorithms.test.ts` |
-| Cycle detection (directed and undirected) | `graph-algorithms.ts` | O(V + E) | O(V) | `graph-algorithms.test.ts` |
-| Fibonacci memo and tabulation | `dynamic-programming.ts` | O(n) | O(n), O(1) | `dynamic-programming.test.ts` |
-| 0/1 knapsack | `dynamic-programming.ts` | O(n * W) | O(W) | `dynamic-programming.test.ts` |
-| LCS | `dynamic-programming.ts` | O(m * n) | O(m * n) | `dynamic-programming.test.ts` |
-| LIS length | `dynamic-programming.ts` | O(n log n) | O(n) | `dynamic-programming.test.ts` |
-| Edit distance | `dynamic-programming.ts` | O(m * n) | O(min(m, n)) | `dynamic-programming.test.ts` |
-| Coin change (min coins, ways) | `dynamic-programming.ts` | O(amount * coins) | O(amount) | `dynamic-programming.test.ts` |
-| Grid paths with obstacles | `dynamic-programming.ts` | O(rows * cols) | O(cols) | `dynamic-programming.test.ts` |
-| Matrix chain order | `dynamic-programming.ts` | O(n^3) | O(n^2) | `dynamic-programming.test.ts` |
-| Two pointers, 3Sum, container with most water | `array-techniques.ts` | O(n) to O(n^2) | O(1) | `array-techniques.test.ts` |
-| Sliding window (fixed and variable) | `array-techniques.ts` | O(n) | O(1) to O(alphabet) | `array-techniques.test.ts` |
-| Prefix sums, subarray sum equals k | `array-techniques.ts` | O(n) build, O(1) query | O(n) | `array-techniques.test.ts` |
-| Permutations, subsets, combinations | `backtracking.ts` | O(n * n!), O(n * 2^n), O(n * C(n,k)) | O(n) | `backtracking.test.ts` |
-| N-queens, sudoku | `backtracking.ts` | exponential | O(n), O(81) | `backtracking.test.ts` |
-| KMP search | `strings.ts` | O(n + m) | O(m) | `strings-interview.test.ts` |
-| Palindromes, anagram check and grouping | `strings.ts` | O(n) to O(n^2) | O(1) to O(n) | `strings-interview.test.ts` |
-| Two sum, valid parentheses, merge intervals, kth largest, max subarray, reverse list | `interview.ts` | see header comments | see header comments | `strings-interview.test.ts` |
+| Bubble, insertion, selection sort | `sorting.hpp` | O(n^2) | O(1) extra | `test_sorting.cpp` |
+| Merge sort (stable) | `sorting.hpp` | O(n log n) | O(n) | `test_sorting.cpp` |
+| Quick sort (3-way, median of three) | `sorting.hpp` | O(n log n) expected, O(n^2) worst | O(log n) | `test_sorting.cpp` |
+| Heap sort | `sorting.hpp` | O(n log n) | O(1) extra | `test_sorting.cpp` |
+| Counting sort | `sorting.hpp` | O(n + k) | O(n + k) | `test_sorting.cpp` |
+| Binary search, lower/upper bound, count | `searching.hpp` | O(log n) | O(1) | `test_searching.cpp` |
+| Rotated array search, rotation point | `searching.hpp` | O(log n), O(n) with duplicates | O(1) | `test_searching.cpp` |
+| Search on answer, ship within days, integer sqrt | `searching.hpp` | O(log range) probes | O(1) | `test_searching.cpp` |
+| BFS, DFS, unweighted path, components | `graph_algorithms.hpp` | O(V + E) | O(V) | `test_graph_algorithms.cpp` |
+| Topological sort (Kahn) | `graph_algorithms.hpp` | O(V + E) | O(V) | `test_graph_algorithms.cpp` |
+| Dijkstra | `graph_algorithms.hpp` | O((V + E) log V) | O(V) | `test_graph_algorithms.cpp` |
+| Bellman-Ford | `graph_algorithms.hpp` | O(V * E) | O(V) | `test_graph_algorithms.cpp` |
+| Kruskal, Prim | `graph_algorithms.hpp` | O(E log E), O(E log V) | O(V + E) | `test_graph_algorithms.cpp` |
+| Cycle detection (directed and undirected) | `graph_algorithms.hpp` | O(V + E) | O(V) | `test_graph_algorithms.cpp` |
+| Fibonacci (memo, tabulation) | `dynamic_programming.hpp` | O(n) | O(n), O(1) | `test_dynamic_programming.cpp` |
+| 0/1 knapsack | `dynamic_programming.hpp` | O(n * W) | O(W) | `test_dynamic_programming.cpp` |
+| LCS | `dynamic_programming.hpp` | O(m * n) | O(m * n) | `test_dynamic_programming.cpp` |
+| LIS length | `dynamic_programming.hpp` | O(n log n) | O(n) | `test_dynamic_programming.cpp` |
+| Edit distance | `dynamic_programming.hpp` | O(m * n) | O(min(m, n)) | `test_dynamic_programming.cpp` |
+| Coin change (min coins, ways) | `dynamic_programming.hpp` | O(amount * coins) | O(amount) | `test_dynamic_programming.cpp` |
+| Grid paths with obstacles | `dynamic_programming.hpp` | O(rows * cols) | O(cols) | `test_dynamic_programming.cpp` |
+| Matrix chain order | `dynamic_programming.hpp` | O(n^3) | O(n^2) | `test_dynamic_programming.cpp` |
+| Two pointers, 3Sum, most water | `array_techniques.hpp` | O(n) to O(n^2) | O(1) | `test_array_techniques.cpp` |
+| Sliding window (fixed and variable) | `array_techniques.hpp` | O(n) | O(1) to O(alphabet) | `test_array_techniques.cpp` |
+| Prefix sums, subarray sum equals k | `array_techniques.hpp` | O(n) build, O(1) query | O(n) | `test_array_techniques.cpp` |
+| Permutations, subsets, combinations | `backtracking.hpp` | O(n * n!), O(n * 2^n), O(k * C(n,k)) | O(n) plus output | `test_backtracking.cpp` |
+| N-queens, sudoku | `backtracking.hpp` | exponential | O(n), O(81) | `test_backtracking.cpp` |
+| KMP search | `strings.hpp` | O(n + m) | O(m) | `test_strings_interview.cpp` |
+| Palindromes, anagram check and grouping | `strings.hpp` | O(n) to O(n^2) | O(1) to O(n) | `test_strings_interview.cpp` |
+| Two sum, valid parentheses, merge intervals, kth largest, max subarray, reverse list | `interview.hpp` | see comment above each function | see comment above each function | `test_strings_interview.cpp` |
 
-Tests live in `tests/` and mirror `src/`. Several related structures share a test file as listed above.
+## Design notes
 
-## Testing approach
+- Nodes are owned by `std::unique_ptr`; there is no `new` or `delete`. Destructors of lists, trees and the hash map
+  unlink iteratively, so a 300000 node list or a 100000 node degenerate tree does not overflow the stack.
+- Containers are non-copyable and non-movable (copy and move are deleted) to keep ownership simple. Pass them by reference.
+- Empty-container access throws (`std::underflow_error`), bad indexes throw `std::out_of_range`, bad arguments throw
+  `std::invalid_argument`.
+- Sorting functions take the vector by value and return a sorted copy. `Compare(a, b)` means "a goes before b".
+- Vertices of `Graph` are integers `0..n-1`; weights are `long long`.
 
-Besides example-based tests there are seeded randomized tests (mulberry32 generator in `tests/helpers/rng.ts`,
-so runs are reproducible). Some of the comparisons:
+## What was run
 
-- every sort equals `Array.prototype.sort` with a numeric comparator on 200 random arrays, plus 50000-element inputs
-- BST and AVL invariants (ordering, stored heights, balance) are checked during random inserts and deletes
-- hash map is compared with `Map` over 20000 random operations; LRU cache eviction order is compared with a reference
-- Dijkstra and Bellman-Ford are compared with Floyd-Warshall; Kruskal and Prim with a brute-force subset search
-- knapsack, LCS, coin change, matrix chain are compared with brute force on small inputs
-- error paths: pop from empty stack, invalid indices, negative cycles, cyclic topological sort, bad arguments
+All of this was run on macOS (arm64) with Apple clang 21.0.0. The `g++` command on that machine is the same clang.
 
-## Results
-
-Measured with `npm test` on Node 20.20.2:
-
-- 16 test suites, 195 tests, all passing
-- coverage: 99.49% statements, 97.87% branches, 100% functions, 99.86% lines
-- enforced thresholds in `jest.config.js`: 95% statements, 90% branches, 95% functions, 95% lines
-
-`npm run lint`, `npm run typecheck` and `npm run build` pass. The CI workflow passes `actionlint` but has not
-run on GitHub yet.
-
-## Adding a new problem
-
-1. Add the function to the matching file in `src/algorithms/` (or a new file, then export it from `src/algorithms/index.ts`).
-   Put a one-line comment above it with time and space complexity.
-2. Add tests in the mirrored file under `tests/algorithms/`: a few known examples, the edge cases (empty, single element,
-   duplicates), and if a simple brute force exists, a seeded random comparison using `makeRng`.
-3. Run `npm run lint && npm run typecheck && npm test`.
-
-## Layout
-
-```
-src/
-  data-structures/   one file per structure, index.ts re-exports
-  algorithms/        grouped by topic, index.ts re-exports
-  utils/compare.ts   shared comparator type
-tests/
-  data-structures/   mirrors src
-  algorithms/        mirrors src
-  helpers/rng.ts     seeded random helpers
-legacy/index.js      the original file
-.github/workflows/ci.yml
-```
+- `make test`: 149 test cases, 186052 assertions, all passing (doctest). Built with `-std=c++17 -Wall -Wextra -Wpedantic -Werror`.
+- Same suite with `STD=-std=c++20`: all passing.
+- `make sanitize` (AddressSanitizer plus UndefinedBehaviorSanitizer, `-fno-sanitize-recover=all`): all 149 test cases pass with no reports.
+  LeakSanitizer is not supported on macOS, so leaks were checked separately with the macOS `leaks --atExit` tool: 0 leaks.
+  Valgrind was not used.
+- `make headers`: every header compiles by itself with the warning flags.
+- Randomised tests compare against `std::sort`, `std::priority_queue`, `std::unordered_map`, `std::set`, `std::deque`,
+  Floyd-Warshall (shortest paths), brute-force subset search (MST, knapsack, LCS), and plain reference implementations.
+  Seeds are fixed (`mt19937`), so runs are repeatable.
+- Line coverage with clang (`make coverage`, headers only): 99.95% of lines (1 of 1903 missed), 100% of functions,
+  96.94% of branches (30 of 980 missed).
+- Mutation check, done by hand: six deliberate bugs were put into the library one at a time and each made the suite fail,
+  then each was reverted. They were: hash map erase not decrementing the size, AVL rebalance threshold off, merge sort
+  made unstable, LRU `get` not refreshing recency, `lower_bound_index` comparison flipped, Kruskal sorting heaviest first.
+- cppcheck 2.22 (`--enable=warning,style,performance,portability`) and clang-tidy 23 (`bugprone-*`, `clang-analyzer-*`,
+  `performance-*`) were run on the headers and tests. The two real findings (uninitialised struct members in the priority
+  queue, a missing `const` in the trie) were fixed. The remaining reports are style suggestions, test-code notes
+  such as unchecked `optional` access after a `CHECK`, and a few false positives. They were not changed.
+- The GitHub Actions workflow (`.github/workflows/ci.yml`: g++ and clang++, C++17 and C++20, plus an ASan/UBSan job)
+  passes `actionlint` but has not run on GitHub. It has not been compiled with GNU g++ at all; only Apple clang was available.
 
 ## Limitations
 
-- Not optimised for production use; the built-in `Array`, `Map` and `sort` are faster for real workloads.
-- The default hash in `HashMap` hashes the string form of the key, so distinct objects all collide. Pass your own hash
-  function for object keys.
-- `BinarySearchTree` is unbalanced and ignores duplicate values (set semantics), as does `AVLTree`.
-- Recursion is used in AVL operations (depth is O(log n)), `mergeSort`, `fibMemo` (depth n, so large n can overflow the stack;
-  use `fibTab`), and `solveSudoku`.
-- Sorting functions copy the input; none sort in place. `heapSort` uses O(n) extra space in this version.
-- `countingSort` only accepts integers and allocates an array the size of the value range.
-- Dijkstra rejects negative weights; undirected graphs keep parallel edges and self loops.
-- Floating-point weights are accepted but not compared with a tolerance.
-- The CI workflow was linted with actionlint only; it has not run on GitHub.
+- Educational code, not tuned for production. The standard containers are faster and more complete.
+- `HashMap` uses `std::hash` by default and has no iterators, only `for_each`. Its bucket count doubles but never shrinks.
+- `BinarySearchTree` and `AVLTree` store unique values (set semantics) and need copyable elements. The AVL
+  operations recurse, which is fine because the depth is O(log n).
+- `merge_sort` and `fib_memo` recurse; `fib_memo` is limited to n <= 93 because the result must fit in `uint64_t`.
+- `counting_sort` takes `int` only and throws if the value range is larger than 100 million by default.
+- `Trie` and the string algorithms work on bytes, so they do not understand Unicode code points.
+- `LRUCache` returns copies of values (`std::optional<V>`) and uses `std::list` and `std::unordered_map` internally.
+- `solve_sudoku` is plain backtracking and can be slow on adversarial puzzles.
+- Containers are not thread-safe.
