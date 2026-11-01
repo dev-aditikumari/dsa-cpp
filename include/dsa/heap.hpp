@@ -93,8 +93,8 @@ public:
 private:
     struct Entry {
         T item;
-        double priority;
-        std::size_t order;
+        double priority = 0;
+        std::size_t order = 0;
     };
     struct Before {
         bool operator()(const Entry& a, const Entry& b) const {

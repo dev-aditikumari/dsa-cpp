@@ -63,7 +63,7 @@ public:
         --size_;
         // Remove nodes that no longer lead to any word.
         for (std::size_t i = path.size(); i-- > 0;) {
-            Node* child = path[i].first->children[path[i].second].get();
+            const Node* child = path[i].first->children[path[i].second].get();
             if (child->terminal || !child->children.empty()) break;
             path[i].first->children.erase(path[i].second);
         }
