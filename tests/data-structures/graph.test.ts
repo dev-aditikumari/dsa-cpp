@@ -10,6 +10,8 @@ describe("Graph", () => {
     expect(g.hasEdge("b", "a")).toBe(true);
     expect(g.edgeCount).toBe(1);
     expect(g.vertexCount).toBe(2);
+    expect(g.hasVertex("a")).toBe(true);
+    expect(g.hasVertex("z")).toBe(false);
     expect(g.neighbors("b")).toEqual([{ to: "a", weight: 4 }]);
   });
 

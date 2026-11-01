@@ -79,6 +79,7 @@ describe("PriorityQueue", () => {
       "low",
     ]);
     expect(pq.isEmpty()).toBe(true);
+    expect(pq.size).toBe(0);
   });
 
   it("rejects NaN priority and empty access", () => {
