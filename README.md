@@ -129,3 +129,7 @@ All of this was run on macOS (arm64) with Apple clang 21.0.0. The `g++` command 
 - `LRUCache` returns copies of values (`std::optional<V>`) and uses `std::list` and `std::unordered_map` internally.
 - `solve_sudoku` is plain backtracking and can be slow on adversarial puzzles.
 - Containers are not thread-safe.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
